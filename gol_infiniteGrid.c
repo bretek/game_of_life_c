@@ -223,12 +223,10 @@ void *render(void *listInput) {
     int gridHeight = 0;
     int centerX = 0;
     int centerY = 0;
-    int quit = 0;
     char input;
-    int paused = 0;
     char **grid;
     
-    while (!quit) {
+    while (1) {
         //check width and height
         ioctl(0, TIOCGWINSZ, &win);
         int newGridWidth = win.ws_col;
@@ -263,11 +261,10 @@ void *render(void *listInput) {
                 update = 1;
             }
             else if (input == 'q') {
-                //quit = 1;
                 exit(0);
             }
             else if (input == '\n') {
-                paused = 1;
+                int paused = 1;
                 while (paused) {
                     if (read(STDIN_FILENO, &input, 1) == 1 && input == '\n') {
                         paused = 0;
@@ -287,12 +284,8 @@ void *render(void *listInput) {
 
 void updateList (struct List *list) {
     update = 1;
-    int killAdjacents = 0;
-    int birthAdjacents = 0;
     int numToAdd = 0;
     int numToRemove = 0;
-    int found = 0;
-    int duplicate = 0;
     int xCoord;
     int yCoord;
     int xCoord2;
@@ -321,7 +314,6 @@ void updateList (struct List *list) {
     
     pthread_mutex_lock(&mutex);
     cell *currentCell = list->first;
-    cell *currentCell2 = list->first;
     cell *lastCell;
     while (currentCell->next != NULL) {
         currentCell = currentCell->next;
@@ -330,14 +322,14 @@ void updateList (struct List *list) {
     
     currentCell = list->first;
     for (int cellNum = 0; cellNum < list->size; ++cellNum) {
-        killAdjacents = 0;
+        int killAdjacents = 0;
         
         for (int vert = -1; vert < 2; ++vert) {
             for (int horiz = -1; horiz < 2; ++horiz) {
-                found = 0;
+                int found = 0;
                 xCoord = currentCell->x + horiz;
                 yCoord = currentCell->y + vert;
-                currentCell2 = list->first;
+                cell *currentCell2 = list->first;
                 for (int cellNum2 = 0; cellNum2 < list->size; ++cellNum2) {
                     if (currentCell2->x == xCoord && currentCell2->y == yCoord) {
                         found = 1;
@@ -347,7 +339,7 @@ void updateList (struct List *list) {
                 }
                 
                 if (!found) {
-                    birthAdjacents = 0;
+                    int birthAdjacents = 0;
                     
                     for (int vert2 = -1; vert2 < 2; ++vert2) {
                         for (int horiz2 = -1; horiz2 < 2; ++horiz2) {
@@ -367,7 +359,7 @@ void updateList (struct List *list) {
                         //puts("make cell");
                         //printf("X: %d Y: %d \n", xCoord, yCoord);
                         //check for duplicate birth
-                        duplicate = 0;
+                        int duplicate = 0;
                         currentCell2 = list->first;
                         while (currentCell2 != NULL) {
                             if (currentCell2->x == xCoord && currentCell2->y == yCoord) {
